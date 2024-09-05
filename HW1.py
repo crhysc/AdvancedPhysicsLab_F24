@@ -1,5 +1,4 @@
 import numpy as np
-import scipy as sc
 from scipy import stats
 import datetime
 from datetime import timedelta
@@ -9,7 +8,7 @@ temps = np.array([98.51, 98.50, 98.50, 98.49, 98.52, 98.49, 98.52, 98.45, 98.47]
 # Array of times corresponding to each temperature measurement
 times = [datetime.time(14, x, 16) for x in np.arange(45, 54, 1)]
 minutesElapsed = np.arange(0, len(temps), 1)
-# Arithmetic mean of the temperature measurements.
+# Mean of the temperature measurements.
 meanTemp = round(np.mean(temps), 5)
 print("Mean temperature is ", meanTemp)
 # Standard deviation of the temperature measurements.
@@ -42,8 +41,15 @@ plt.show()
 # Calculate common uncertainty
 def getCommonUncertainty (array, slope, intercept): 
     commonUncertainty = np.sqrt(\
-        (1 / (len(array) - 2)) * np.sum(\
-            temps[x] - slope * minutesElapsed[x] - intercept) ** 2 for x in  np.arange(1, len(temps)))
+        (1 / (len(array) - 2)) * np.sum(y - (slope * x) - intercept for x,y in enumerate(array)) ** 2\
+            )
     return commonUncertainty
 commonUncertainty = getCommonUncertainty(temps, slope, intercept)
 print("The common uncertainty of the temperature measurements is", commonUncertainty)
+# Use common uncertainty and measurement uncertainty to get the uncertainty in slope for cases A, B, and C
+def getSlopeUncertainty (array, slope, intercept, measurementUncertainty):
+    slopeUncertainty = np.sqrt(getCommonUncertainty(array, slope, intercept) ** 2 + measurementUncertainty ** 2)
+    return slopeUncertainty
+print("The slope uncertainty for case A is", getSlopeUncertainty(temps, slope, intercept, ATempUncertainty))
+print("The slope uncertainty for case B is", getSlopeUncertainty(temps, slope, intercept, BTempUncertainty))
+print("The slope uncertainty for case C is", getSlopeUncertainty(temps, slope, intercept, CTempUncertainty))
